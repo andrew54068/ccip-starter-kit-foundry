@@ -1,0 +1,20 @@
+successful onchain
+forge script ./script/Example02.s.sol:DeployBasicMessageReceiver -vvv --broadcast --rpc-url optimismSepolia --sig "run(uint8)" -- 3
+forge script ./script/BatchSend.s.sol:DeployMessageTokenSender -vvv --broadcast --rpc-url polygonAmoy --sig "run(uint8)" -- 3 --etherscan-api-key $POLYGONSCAN_API_KEY --verifier-url "https://api-amoy.polygonscan.com/api?" --verify
+forge script ./script/BatchSend.s.sol:DeployMessageTokenSender -vvv --broadcast --rpc-url arbitrumSepolia --sig "run(uint8)" -- 2 --etherscan-api-key $ARB_ETHERSCAN_API_KEY --verifier-url "https://api-sepolia.arbiscan.io/api?" --verify
+
+
+
+worked command
+forge verify-contract --chain amoy --verifier-url "https://api-amoy.polygonscan.com/api?" 0x03481D3F070E566cF592bb0EcDaf84945B3142f9 ./src/MessageTokenSender.sol:MessageTokenSender --constructor-args $(cast abi-encode "constructor(address,address)" 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2 0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904) --compiler-version 0.8.19 --etherscan-api-key $POLYGONSCAN_API_KEY
+
+forge verify-contract --chain arbitrum-sepolia --verifier-url "https://api-sepolia.arbiscan.io/api?" 0xfAa933848Bd4C9AAb7Ee25Dd5c80E4dCCa678307 ./src/MessageTokenSender.sol:MessageTokenSender --constructor-args $(cast abi-encode "constructor(address,address)" 0x2a9C5afB0d0e4BAb2BCdaE109EC4b0c4Be15a165 0xb1D4538B4571d411F07960EF2838Ce337FE1E80E) --compiler-version 0.8.19 --etherscan-api-key $ARB_ETHERSCAN_API_KEY
+
+curl 'https://api-amoy.polygonscan.com/api?module=contract&action=getcontractcreation&contractaddresses=0x03481D3F070E566cF592bb0EcDaf84945B3142f9&apikey=B7WPN9PGJSXGE146UP8EMVHVQU2J6UNNKC'
+
+curl 'https://api-sepolia-optimistic.etherscan.io/api?module=contract&action=getcontractcreation&contractaddresses=0xe0802908279395CD236EAA4900fCBA44E632b66E&apikey=UN9TKHBX6ZQE3ASCJJF69RRURRSIRW8EJ8'
+
+curl 'https://api-sepolia.arbiscan.io/api?module=contract&action=getcontractcreation&contractaddresses=0xfAa933848Bd4C9AAb7Ee25Dd5c80E4dCCa678307&apikey=Z2AZW5KR883UXV2VUKDJVHZGF4478WMYRX'
+
+not working
+forge verify-contract --chain optimism-sepolia --verifier-url "https://api-sepolia-optimistic.etherscan.io/api?" 0xe0802908279395CD236EAA4900fCBA44E632b66E ./src/MessageTokenSender.sol:MessageTokenSender --constructor-args $(cast abi-encode "constructor(address,address)" 0x114A20A10b43D4115e5aeef7345a1A71d2a60C57 0xE4aB69C077896252FAFBD49EFD26B5D171A32410) --compiler-version 0.8.19 --etherscan-api-key $OP_ETHERSCAN_API_KEY

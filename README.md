@@ -127,6 +127,40 @@ Or if you want to mint 10\*\*18 units of `CCIP-BnM` test token on Avalanche Fuji
 forge script ./script/Faucet.s.sol -vvv --broadcast --rpc-url avalancheFuji --sig "run(uint8)" -- 2
 ```
 
+### Example 0 - Transfer Tokens and Message in batch to other chain
+
+1. Deploy receiver first to optimism sepolia
+```shell
+forge script ./script/Example02.s.sol:DeployBasicMessageReceiver -vvv --broadcast --rpc-url optimismSepolia --sig "run(uint8)" -- 3
+```
+
+2. Deploy sender to arbitrum sepolia
+```shell
+forge script ./script/BatchSend.s.sol:DeployMessageTokenSender -vvv --broadcast --rpc-url arbitrumSepolia --sig "run(uint8)" -- 2 --etherscan-api-key $ARB_ETHERSCAN_API_KEY --verifier-url "https://api-sepolia.arbiscan.io/api?" --verify
+```
+
+3. Verify sender contract
+make sure to fill .env correctly
+```shell
+source .env
+
+forge verify-contract --chain arbitrum-sepolia --verifier-url "https://api-sepolia.arbiscan.io/api?" 0xfAa933848Bd4C9AAb7Ee25Dd5c80E4dCCa678307 ./src/MessageTokenSender.sol:MessageTokenSender --constructor-args $(cast abi-encode "constructor(address,address)" 0x2a9C5afB0d0e4BAb2BCdaE109EC4b0c4Be15a165 0xb1D4538B4571d411F07960EF2838Ce337FE1E80E) --compiler-version 0.8.19 --etherscan-api-key $ARB_ETHERSCAN_API_KEY
+```
+
+4. Approve sender to spend at least 9 (uint256) USDC on arbitrum sepolia
+https://sepolia.arbiscan.io/address/0x75faf114eafb1bdbe2f0316df893fd58ce46aa4d#writeProxyContract
+
+5. Send Tx from sender contract
+0.02
+5224473277236331295
+0xfAa933848Bd4C9AAb7Ee25Dd5c80E4dCCa678307
+0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d
+![sender sendBatch](image.png)
+
+6. Lookup message id from CCIP explorer
+https://ccip.chain.link/tx/0x3842f9b5bf1f7088a70dc8dff4e48e3193a11f9a06cd9677937d36ef5e313d9f
+
+
 ### Example 1 - Transfer Tokens from EOA to EOA
 
 To transfer tokens from one EOA on one blockchain to another EOA on another blockchain you can use the `script/Example01.s.sol` smart contract:
