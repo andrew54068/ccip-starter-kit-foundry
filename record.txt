@@ -3,7 +3,11 @@ forge script ./script/Example02.s.sol:DeployBasicMessageReceiver -vvv --broadcas
 forge script ./script/BatchSend.s.sol:DeployMessageTokenSender -vvv --broadcast --rpc-url polygonAmoy --sig "run(uint8)" -- 3 --etherscan-api-key $POLYGONSCAN_API_KEY --verifier-url "https://api-amoy.polygonscan.com/api?" --verify
 forge script ./script/BatchSend.s.sol:DeployMessageTokenSender -vvv --broadcast --rpc-url arbitrumSepolia --sig "run(uint8)" -- 2 --etherscan-api-key $ARB_ETHERSCAN_API_KEY --verifier-url "https://api-sepolia.arbiscan.io/api?" --verify
 
+forge create --rpc-url polygon src/BasicMessageReceiver.sol:BasicMessageReceiver --constructor-args "0x849c5ED5a80F5B408Dd4969b78c2C8fdf0565Bfe" --private-key $PRIVATE_KEY --etherscan-api-key $POLYGONSCAN_API_KEY --verify
 
+forge create --rpc-url optimism src/MessageTokenSender.sol:MessageTokenSender --constructor-args "0x3206695CaE29952f4b0c22a169725a865bc8Ce0f" "0x350a791Bfc2C21F9Ed5d10980Dad2e2638ffa7f6" --private-key $PRIVATE_KEY --etherscan-api-key $OP_ETHERSCAN_API_KEY --verify
+
+forge script ./script/BatchSend.s.sol:SendBatchMessage -vvv --broadcast --rpc-url optimism --sig "run(address,address,address,uint8)" -- 0x436f795B64E23E6cE7792af4923A68AFD3967952 0x143c2Ad2E9BFa8D8d477F68BE32202b56a83d1aF 0xfbFF228139ac0ff04dA483Ac9Ec59366221fd31d 0
 
 worked command
 forge verify-contract --chain amoy --verifier-url "https://api-amoy.polygonscan.com/api?" 0x03481D3F070E566cF592bb0EcDaf84945B3142f9 ./src/MessageTokenSender.sol:MessageTokenSender --constructor-args $(cast abi-encode "constructor(address,address)" 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2 0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904) --compiler-version 0.8.19 --etherscan-api-key $POLYGONSCAN_API_KEY

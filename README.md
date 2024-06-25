@@ -129,36 +129,25 @@ forge script ./script/Faucet.s.sol -vvv --broadcast --rpc-url avalancheFuji --si
 
 ### Example 0 - Transfer Tokens and Message in batch to other chain
 
-1. Deploy receiver first to optimism sepolia
-```shell
-forge script ./script/Example02.s.sol:DeployBasicMessageReceiver -vvv --broadcast --rpc-url optimismSepolia --sig "run(uint8)" -- 3
-```
-
-2. Deploy sender to arbitrum sepolia
-```shell
-forge script ./script/BatchSend.s.sol:DeployMessageTokenSender -vvv --broadcast --rpc-url arbitrumSepolia --sig "run(uint8)" -- 2 --etherscan-api-key $ARB_ETHERSCAN_API_KEY --verifier-url "https://api-sepolia.arbiscan.io/api?" --verify
-```
-
-3. Verify sender contract
-make sure to fill .env correctly
+1. Deploy receiver first to polygon mainnet
 ```shell
 source .env
 
-forge verify-contract --chain arbitrum-sepolia --verifier-url "https://api-sepolia.arbiscan.io/api?" 0xfAa933848Bd4C9AAb7Ee25Dd5c80E4dCCa678307 ./src/MessageTokenSender.sol:MessageTokenSender --constructor-args $(cast abi-encode "constructor(address,address)" 0x2a9C5afB0d0e4BAb2BCdaE109EC4b0c4Be15a165 0xb1D4538B4571d411F07960EF2838Ce337FE1E80E) --compiler-version 0.8.19 --etherscan-api-key $ARB_ETHERSCAN_API_KEY
+forge create --rpc-url polygon src/BasicMessageReceiver.sol:BasicMessageReceiver --constructor-args "0x849c5ED5a80F5B408Dd4969b78c2C8fdf0565Bfe" --private-key $PRIVATE_KEY --etherscan-api-key $POLYGONSCAN_API_KEY --verify
 ```
 
-4. Approve sender to spend at least 9 (uint256) USDC on arbitrum sepolia
-https://sepolia.arbiscan.io/address/0x75faf114eafb1bdbe2f0316df893fd58ce46aa4d#writeProxyContract
+2. Deploy sender to optimism
+```shell
+forge create --rpc-url optimism src/MessageTokenSender.sol:MessageTokenSender --constructor-args "0x3206695CaE29952f4b0c22a169725a865bc8Ce0f" "0x350a791Bfc2C21F9Ed5d10980Dad2e2638ffa7f6" --private-key $PRIVATE_KEY --etherscan-api-key $OP_ETHERSCAN_API_KEY --verify
+```
 
-5. Send Tx from sender contract
-0.02
-5224473277236331295
-0xfAa933848Bd4C9AAb7Ee25Dd5c80E4dCCa678307
-0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d
-![sender sendBatch](image.png)
+4. Approve sender to spend at least 9 (uint256) USDC on arbitrum sepolia and transfer ETH to sender
+```shell
+forge script ./script/BatchSend.s.sol:SendBatchMessage -vvv --broadcast --rpc-url optimism --sig "run(address,address,address,uint8)" -- <your eoa address> <contract from step 2> <contract from step 1> 0
+```
 
-6. Lookup message id from CCIP explorer
-https://ccip.chain.link/tx/0x3842f9b5bf1f7088a70dc8dff4e48e3193a11f9a06cd9677937d36ef5e313d9f
+5. Lookup message id from CCIP explorer
+https://ccip.chain.link/tx/0xac97c8cd118bc0ad9511b1bdf00e4b53d9fa7df88dea634c58528d03aebabccb
 
 
 ### Example 1 - Transfer Tokens from EOA to EOA
