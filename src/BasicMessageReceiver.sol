@@ -20,7 +20,8 @@ contract BasicMessageReceiver is CCIPReceiver, Withdraw {
         bytes32 latestMessageId,
         uint64 latestSourceChainSelector,
         address latestSender,
-        string latestMessage
+        string latestMessage,
+        Client.EVMTokenAmount[] destTokenAmounts
     );
 
     constructor(address router) CCIPReceiver(router) {}
@@ -37,7 +38,8 @@ contract BasicMessageReceiver is CCIPReceiver, Withdraw {
             latestMessageId,
             latestSourceChainSelector,
             latestSender,
-            latestMessage
+            latestMessage,
+            message.destTokenAmounts
         );
     }
 

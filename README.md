@@ -127,7 +127,9 @@ Or if you want to mint 10\*\*18 units of `CCIP-BnM` test token on Avalanche Fuji
 forge script ./script/Faucet.s.sol -vvv --broadcast --rpc-url avalancheFuji --sig "run(uint8)" -- 2
 ```
 
-### Example 0 - Transfer Tokens and Message in batch to other chain
+## Experiments
+
+### Case 1 - Transfer Tokens and Message in batch to other chain
 
 1. Deploy receiver first to polygon mainnet
 ```shell
@@ -149,6 +151,45 @@ forge script ./script/BatchSend.s.sol:SendBatchMessage -vvv --broadcast --rpc-ur
 5. Lookup message id from CCIP explorer
 https://ccip.chain.link/tx/0xac97c8cd118bc0ad9511b1bdf00e4b53d9fa7df88dea634c58528d03aebabccb
 
+### Case 2 - Transfer different Tokens and Message in a batch
+1. Deploy receiver first to polygon mainnet\
+deployed contract at: 0xb6f263D2EE73bf89E1F24C7Da8a902Db9403C421
+```shell
+source .env
+
+forge create --rpc-url polygon src/BasicMessageReceiver.sol:BasicMessageReceiver --constructor-args "0x849c5ED5a80F5B408Dd4969b78c2C8fdf0565Bfe" --private-key $PRIVATE_KEY --etherscan-api-key $POLYGONSCAN_API_KEY --verify
+```
+
+2. Verify previous contract
+```shell
+source .env
+
+forge create --rpc-url arbitrum src/MessageTokensSender.sol:MessageTokensSender --constructor-args 0x141fa059441E0ca23ce184B6A78bafD2A517DdE8 0xf97f4df75117a78c1A5a0DBb814Af92458539FB4 --private-key $PRIVATE_KEY --etherscan-api-key $ARB_ETHERSCAN_API_KEY --verify
+```
+
+3. Based on [here](https://docs.chain.link/ccip/supported-networks/v1_2_0/mainnet#arbitrum-mainnet-polygon-mainnet), we send USDC and BETS to polygon
+```shell
+forge script ./script/BatchSends.s.sol:SendBatchMessage --via-ir -vvvv --rpc-url arbitrum --sig "run(address,address,address,uint8)" -- 0x436f795B64E23E6cE7792af4923A68AFD3967952 0x16597780067D440c14deB65971C76dD603FC3044 0xb6f263D2EE73bf89E1F24C7Da8a902Db9403C421 0
+```
+
+[Result Example](https://ccip.chain.link/tx/0xe16f0c3d17d378959ae700197cf30e68c1467089632dc6a1266f18baf58830e8)
+
+
+### To manually verify previous contract
+```shell
+source .env
+
+forge verify-contract --chain polygon --verifier-url "https://api.polygonscan.com/api?" 0xb6f263D2EE73bf89E1F24C7Da8a902Db9403C421 src/BasicMessageReceiver.sol:BasicMessageReceiver --constructor-args $(cast abi-encode "constructor(address)" 0x141fa059441E0ca23ce184B6A78bafD2A517DdE8) --etherscan-api-key $POLYGONSCAN_API_KEY
+
+```
+
+or 
+
+```shell
+forge verify-contract --chain arbitrum --verifier-url "https://api.arbiscan.io/api?" 0x16597780067D440c14deB65971C76dD603FC3044 src/MessageTokensSender.sol:MessageTokensSender --constructor-args $(cast abi-encode "constructor(address,address)" 0x141fa059441E0ca23ce184B6A78bafD2A517DdE8 0xf97f4df75117a78c1A5a0DBb814Af92458539FB4) --etherscan-api-key $ARB_ETHERSCAN_API_KEY
+```
+
+## Examples
 
 ### Example 1 - Transfer Tokens from EOA to EOA
 

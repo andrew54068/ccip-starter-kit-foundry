@@ -6,6 +6,7 @@ import {IERC20} from "@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-sol
 import {SafeERC20} from "@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v4.8.3/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import {Withdraw} from "./utils/Withdraw.sol";
 
 /**
@@ -31,38 +32,30 @@ contract MessageTokensSender is Withdraw {
         i_link = link;
     }
 
-    receive() external payable {}
-
     function sendBatch(
         uint64 destChainSelector,
         address receiver,
         Client.EVMTokenAmount[] memory tokensToSendDetails
     ) external payable returns (bytes32[] memory messageIds) {
-        messageIds = new bytes32[](3);
-        messageIds[0] = send(
-            destChainSelector,
-            receiver,
-            "0x2Cf26fb0",
-            tokensToSendDetails,
-            400000,
-            PayFeesIn.Native
-        );
-        messageIds[1] = send(
-            destChainSelector,
-            receiver,
-            "0x2Cf26fb1",
-            tokensToSendDetails,
-            400000,
-            PayFeesIn.Native
-        );
-        messageIds[2] = send(
-            destChainSelector,
-            receiver,
-            "0x2Cf26fb2",
-            tokensToSendDetails,
-            400000,
-            PayFeesIn.Native
-        );
+        uint256 length = tokensToSendDetails.length;
+        messageIds = new bytes32[](length);
+        for (uint256 i = 0; i < length; ) {
+            Client.EVMTokenAmount[]
+                memory tempDetails = new Client.EVMTokenAmount[](1);
+            tempDetails[0] = tokensToSendDetails[i];
+            messageIds[i] = send(
+                destChainSelector,
+                receiver,
+                string.concat("0x2Cf26fb0", Strings.toString(i)),
+                tempDetails,
+                200000,
+                PayFeesIn.Native
+            );
+
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     function send(
@@ -122,4 +115,8 @@ contract MessageTokensSender is Withdraw {
 
         emit MessageSent(messageId);
     }
+
+    fallback() external payable {}
+
+    receive() external payable {}
 }
